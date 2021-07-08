@@ -23,6 +23,8 @@
         validate_certs: no
         state: present
 
+### TAG
+
     - name: Create a tag
       community.vmware.vmware_tag:
         hostname: vcsa.formation.lan
@@ -45,6 +47,8 @@
 
     # - debug:
     #     msg: "{{ tag_details.tag_facts }}"
+
+### VM
 
     - name: Create a virtual machine from a template
       community.vmware.vmware_guest:
@@ -77,5 +81,31 @@
         object_type: VirtualMachine
         validate_certs: no
       delegate_to: localhost
+
+### AJOUT DE LA DATE ###
+
+    - name: Get timestamp from the system
+      shell: "date +%d-%m-%Y%H-%M-%S"
+      register: tstamp
+    
+    - name : set variables
+      set_fact:
+        cur_date: "{{tstamp.stdout[0:10]}}"
+
+    - name: Add virtual machine custom attributes
+      community.vmware.vmware_guest_custom_attributes:
+        hostname: vcsa.formation.lan
+        username: erwan
+        password: F0rmation!
+        name: Deb_Erwan
+        state: present
+        attributes:
+          - name: DateCreation
+            value: "{{cur_date}}"
+        validate_certs: no
+      delegate_to: localhost
+      register: attributes
+
+#AJOUT D'UNE INTERFACE RÉSEAU
 
 ...
