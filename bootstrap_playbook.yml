@@ -1,0 +1,52 @@
+# déclencher le playbook :
+# ansible-playbook premier_playbook.yml -b --ask-become-pass
+---
+- hosts: localhost
+
+  tasks:
+    - name : Include secret items
+      include_vars:
+        file: secrets.yml
+        name: secret
+
+    - name: ajouter un groupe de port sur le vSwitch0 avec un ID de VLAN
+      community.vmware.vmware_portgroup:
+        cluster_name: esxi3.formation.lan
+        port: 9022
+        hostname: 78.192.40.154
+        username: erwan
+        password: F0rmation!
+        switch_name: vswitch_erwan
+        portgroup_name: portgroup_erwan
+        network_policy:
+            promiscuous_mode: True
+        vlan_id: 0100
+
+
+    - name: Add tags to a virtual machine
+      community.vmware.vmware_tag_manager:
+        hostname: 78.192.40.154
+        username: erwan
+        password: F0rmation!
+        tag_names:
+          - Proprio:Erwan
+        state: add
+      delegate_to: localhost
+
+    # - name: Create Deb_Erwan
+    #   connection: local
+    #   gather_facts: no
+    #   tasks:
+    #   - name: Clone the template
+    #     vmware_guest:
+    #       hostname: 78.192.40.154
+    #       username: erwan
+    #       password: F0rmation!
+    #       validate_certs: False
+    #       name: Deb_Erwan
+    #       template: DebTemplate
+    #       datacenter: DC1
+    #       folder: /Datacenter/Pas Touche !/Modeles/DebTemplate
+    #       state: poweredon
+    #       wait_for_ip_address: yes
+...
