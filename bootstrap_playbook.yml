@@ -9,103 +9,131 @@
         file: secrets.yml
         name: secret
 
-    - name: ajouter un groupe de ports sur le vSwitch0 avec un ID de VLAN
-      community.vmware.vmware_portgroup:
-        hosts: esxi1.formation.lan, esxi2.formation.lan, esxi3.formation.lan
-        hostname: vcsa.formation.lan
-        username: erwan
-        password: F0rmation!
-        switch: vSwitch0
-        portgroup_name: VLAN_Erwan
-        network_policy:
-            promiscuous_mode: True
-        vlan_id: 0100
-        validate_certs: no
-        state: present
+#     - name: ajouter un groupe de ports sur le vSwitch0 avec un ID de VLAN
+#       community.vmware.vmware_portgroup:
+#         hosts: esxi1.formation.lan, esxi2.formation.lan, esxi3.formation.lan
+#         hostname: vcsa.formation.lan
+#         username: erwan
+#         password: F0rmation!
+#         switch: vSwitch0
+#         portgroup_name: VLAN_Erwan
+#         network_policy:
+#             promiscuous_mode: True
+#         vlan_id: 0100
+#         validate_certs: no
+#         state: present
 
-### TAG
+# ### TAG
 
-    - name: Create a tag
-      community.vmware.vmware_tag:
-        hostname: vcsa.formation.lan
-        username: erwan
-        password: F0rmation!
-        category_id: urn:vmomi:InventoryServiceCategory:ae1957ef-839b-468c-ac6a-df722535aeb1:GLOBAL
-        tag_name: Erwan
-        tag_description: Tag de moi
-        state: present
-        validate_certs: no
-      delegate_to: localhost
+#     - name: Create a tag
+#       community.vmware.vmware_tag:
+#         hostname: vcsa.formation.lan
+#         username: erwan
+#         password: F0rmation!
+#         category_id: urn:vmomi:InventoryServiceCategory:ae1957ef-839b-468c-ac6a-df722535aeb1:GLOBAL
+#         tag_name: Erwan
+#         tag_description: Tag de moi
+#         state: present
+#         validate_certs: no
+#       delegate_to: localhost
 
-    # - name: Get category id from the given tag
-    #   vmware_tag_facts:
+#     # - name: Get category id from the given tag
+#     #   vmware_tag_facts:
+#     #     hostname: vcsa.formation.lan
+#     #     username: erwan
+#     #     password: F0rmation!
+#     #     validate_certs: no
+#     #   register: tag_details
+
+#     # - debug:
+#     #     msg: "{{ tag_details.tag_facts }}"
+
+# ### VM
+
+#     - name: Create a virtual machine from a template
+#       community.vmware.vmware_guest:
+#         validate_certs: no
+#         hostname: vcsa.formation.lan
+#         username: erwan
+#         password: F0rmation!
+#         datacenter: Datacenter
+#         folder: /
+#         name: Deb_Erwan
+#         state: poweredon
+#         template: DebTemplate
+#         disk:
+#         - size_gb: 5
+#           type: thin
+#           autoselect_datastore: yes
+#         wait_for_ip_address: true
+#       delegate_to: localhost
+#       register: deploy
+
+#     - name: ajout du tag Erwan dans la catégorie Proprio
+#       community.vmware.vmware_tag_manager:
+#         hostname: vcsa.formation.lan
+#         username: erwan
+#         password: F0rmation!
+#         tag_names:
+#           - Erwan
+#         state: add
+#         object_name: Deb_Erwan
+#         object_type: VirtualMachine
+#         validate_certs: no
+#       delegate_to: localhost
+
+# ### AJOUT DE LA DATE ###
+
+#     - name: Get timestamp from the system
+#       shell: "date +%d-%m-%Y%H-%M-%S"
+#       register: tstamp
+    
+#     - name : set variables
+#       set_fact:
+#         cur_date: "{{tstamp.stdout[0:10]}}"
+
+#     - name: Add virtual machine custom attributes
+#       community.vmware.vmware_guest_custom_attributes:
+#         hostname: vcsa.formation.lan
+#         username: erwan
+#         password: F0rmation!
+#         name: Deb_Erwan
+#         state: present
+#         attributes:
+#           - name: DateCreation
+#             value: "{{cur_date}}"
+#         validate_certs: no
+#       delegate_to: localhost
+#       register: attributes
+
+#AJOUT D'UNE INTERFACE RÉSEAU
+
+# - name: add a nic on network with vlan id 2001 for 422d000d-2000-ffff-0000-b00000000000
+#   community.vmware.vmware_guest_network:
+#     hostname: vcsa.formation.lan
+#     username: erwan
+#     password: F0rmation!
+#     datacenter: Datacenter
+#     name: Deb_Erwan
+#     vlan_id: 0100
+
+    # - name: Attach Private Network Adapters for FW Deployment
+    #   vmware_guest_network:
     #     hostname: vcsa.formation.lan
     #     username: erwan
     #     password: F0rmation!
+    #     datacenter: Datacenter
+    #     validate_certs: 'no'
+    #     gather_network_info: false
+    #     name: Deb_Erwan
+    #     networks:
+    #       - name: VLAN_Erwan
+    #         device_type: vmxnet3
+    #         state: new
+    #         label: "Network adapter 2"
+    #         connected: true
+    #         start_connected: true
     #     validate_certs: no
-    #   register: tag_details
-
-    # - debug:
-    #     msg: "{{ tag_details.tag_facts }}"
-
-### VM
-
-    - name: Create a virtual machine from a template
-      community.vmware.vmware_guest:
-        validate_certs: no
-        hostname: vcsa.formation.lan
-        username: erwan
-        password: F0rmation!
-        datacenter: Datacenter
-        folder: /
-        name: Deb_Erwan
-        state: poweredon
-        template: DebTemplate
-        disk:
-        - size_gb: 5
-          type: thin
-          autoselect_datastore: yes
-        wait_for_ip_address: true
-      delegate_to: localhost
-      register: deploy
-
-    - name: ajout du tag Erwan dans la catégorie Proprio
-      community.vmware.vmware_tag_manager:
-        hostname: vcsa.formation.lan
-        username: erwan
-        password: F0rmation!
-        tag_names:
-          - Erwan
-        state: add
-        object_name: Deb_Erwan
-        object_type: VirtualMachine
-        validate_certs: no
-      delegate_to: localhost
-
-### AJOUT DE LA DATE ###
-
-    - name: Get timestamp from the system
-      shell: "date +%d-%m-%Y%H-%M-%S"
-      register: tstamp
-    
-    - name : set variables
-      set_fact:
-        cur_date: "{{tstamp.stdout[0:10]}}"
-
-    - name: Add virtual machine custom attributes
-      community.vmware.vmware_guest_custom_attributes:
-        hostname: vcsa.formation.lan
-        username: erwan
-        password: F0rmation!
-        name: Deb_Erwan
-        state: present
-        attributes:
-          - name: DateCreation
-            value: "{{cur_date}}"
-        validate_certs: no
-      delegate_to: localhost
-      register: attributes
-
-#AJOUT D'UNE INTERFACE RÉSEAU
+    #   delegate_to: localhost
 
 ...
