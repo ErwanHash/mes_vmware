@@ -9,29 +9,32 @@
         file: secrets.yml
         name: secret
 
-    - name: ajouter un groupe de port sur le vSwitch0 avec un ID de VLAN
+    - name: ajouter un groupe de ports sur le vSwitch0 avec un ID de VLAN
       community.vmware.vmware_portgroup:
-        cluster_name: esxi3.formation.lan
-        port: 9022
-        hostname: 78.192.40.154
+        hosts: esxi3.formation.lan
+        hostname: vcsa.formation.lan
         username: erwan
         password: F0rmation!
-        switch_name: vswitch_erwan
-        portgroup_name: portgroup_erwan
+        switch: vSwitch0
+        portgroup_name: VLAN_Erwan
         network_policy:
             promiscuous_mode: True
         vlan_id: 0100
+        validate_certs: no
+        state: present
 
 
-    - name: Add tags to a virtual machine
-      community.vmware.vmware_tag_manager:
-        hostname: 78.192.40.154
-        username: erwan
-        password: F0rmation!
-        tag_names:
-          - Proprio:Erwan
-        state: add
-      delegate_to: localhost
+    # - name: Add tags to a virtual machine
+    #   community.vmware.vmware_tag_manager:
+    #     hostname: vcsa.formation.lan
+    #     username: erwan
+    #     password: F0rmation!
+    #     tag_names:
+    #       - Proprio:Erwan
+    #     state: add
+    #   delegate_to: localhost
+    #   object-name: Deb_Erwan
+    #   object_type: VirtualMachine
 
     # - name: Create Deb_Erwan
     #   connection: local
