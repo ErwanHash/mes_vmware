@@ -1,0 +1,4 @@
+[local]
+manager ansible_connection=local
+
+[dawan]
