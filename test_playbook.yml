@@ -22,3 +22,114 @@
     - name : System date
       debug:
         msg: "{{cur_date}}"
+
+    # - name: add vmxnet3
+    #   vmware_guest_network:
+    #     hostname: vcsa.formation.lan
+    #     username: erwan
+    #     password: F0rmation!
+    #     datacenter: Datacenter
+    #     validate_certs: no
+    #     name: Deb_Erwan
+    #     gather_network_info: true
+    #     networks:
+    #       - name: "VM Network"
+    #         state: present
+    #         device-type: vmxnet3
+    #       - name: "VLAN-Erwan"
+    #         state: new
+    #         device-type: vmxnet3
+    #         label: "Network adapter 2"
+    #         connected: true
+    #         start_connected: true
+
+    
+# - name: add a nic on network with vlan id 2001 for 422d000d-2000-ffff-0000-b00000000000
+#   community.vmware.vmware_guest_network:
+#     hostname: vcsa.formation.lan
+#     username: erwan
+#     password: F0rmation!
+#     datacenter: Datacenter
+#     name: Deb_Erwan
+#     vlan_id: 0100
+
+#     # - name: Get category id from the given tag
+#     #   vmware_tag_facts:
+#     #     hostname: vcsa.formation.lan
+#     #     username: erwan
+#     #     password: F0rmation!
+#     #     validate_certs: no
+#     #   register: tag_details
+
+#     # - debug:
+#     #     msg: "{{ tag_details.tag_facts }}"
+
+    # - name: Gather facts from standalone ESXi server having datacenter as 'ha-datacenter'
+    #   vmware_guest_info:
+    #     hostname: vcsa.formation.lan
+    #     username: erwan
+    #     password: F0rmation!
+    #     datacenter: Datacenter
+    #     validate_certs: no
+    #     name: Deb_Erwan
+    #   delegate_to: localhost
+    #   register: facts
+
+    
+    # - name: Gather SSH host key
+    #   shell: "ssh-keyscan {{ vm_ip }} >> ~/.ssh/known_hosts"
+
+    # - name: Register VM to inventory
+    #   community.vmware.vmware_guest_register_operation:
+    #     hostname: vcsa.formation.lan
+    #     username: erwan
+    #     password: F0rmation!
+    #     datacenter: Datacenter
+    #     folder: /
+    #     name: Deb_Erwan
+    #     template: false
+    #     state: present
+    #     esxi_hostname: "['esxi1.formation.lan', 'esxi2.formation.lan', 'esxi3.formation.lan']"
+    #     validate_certs: no
+
+
+
+    # - name: turn on the vm
+    #   community.vmware.vmware_guest:
+    #     name: Deb_Erwan
+    #     state: poweredon
+    #     wait_for_ip_adress: true
+    #   register: vm_result
+    #   tags: always
+
+    # - name: Add host to multiple groups
+    #   add_host:
+    #     name: 192.168.76.74
+    #     groups:
+    #     - dawan
+
+     - name: Gather all registered virtual machines
+      community.vmware.vmware_vm_info:
+        hostname: vcsa.formation.lan
+        username: erwan
+        password: F0rmation!
+        validate_certs: no
+        folder: "/"
+      delegate_to: localhost
+      register: vm_info
+
+    - debug:
+        msg: "{{ item.tags }}"
+      with_items:
+        - "{{ vm_info.virtual_machines | json_query(query) }}"
+      vars:
+        query: "[?guest_name=='Deb_Erwan']"
+
+    # - name: fact creation
+    #   set_fact:
+    #     vm_ip: "{{vm_info.virtual_machines.guest_name==}}"
+    #   tags: Erwan
+
+    # - debug: var=hostvars[inventory_hostname]['ansible_default_ipv4']['address']
+    
+    # - debug: "{{vm_result.instance.ipv4}}"

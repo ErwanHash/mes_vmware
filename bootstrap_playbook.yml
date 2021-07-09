@@ -1,13 +1,23 @@
-# déclencher le playbook :
-# ansible-playbook premier_playbook.yml -b --ask-become-pass
 ---
-- hosts: localhost
+- name: pt1
+  hosts: local
+  gather_facts: no
+  connection: local
 
   tasks:
+
+    - name: prerequisite
+      assert:
+        that:
+          - lookup('env', 'vcenter_hostname') != ''
+          - lookup('env', 'vcenter_username') != ''
+          - lookup('env', 'vcenter_password') != ''
+        fail_msg: "fail"
+      tags: always  
+
     - name : Include secret items
-      include_vars:
-        file: secrets.yml
-        name: secret
+      include_vars: secrets.yml
+      tags: always
 
 #     - name: ajouter un groupe de ports sur le vSwitch0 avec un ID de VLAN
 #       community.vmware.vmware_portgroup:
@@ -37,85 +47,85 @@
 #         validate_certs: no
 #       delegate_to: localhost
 
-#     # - name: Get category id from the given tag
-#     #   vmware_tag_facts:
-#     #     hostname: vcsa.formation.lan
-#     #     username: erwan
-#     #     password: F0rmation!
-#     #     validate_certs: no
-#     #   register: tag_details
-
-#     # - debug:
-#     #     msg: "{{ tag_details.tag_facts }}"
-
 # ### VM
 
-#     - name: Create a virtual machine from a template
-#       community.vmware.vmware_guest:
-#         validate_certs: no
-#         hostname: vcsa.formation.lan
-#         username: erwan
-#         password: F0rmation!
-#         datacenter: Datacenter
-#         folder: /
-#         name: Deb_Erwan
-#         state: poweredon
-#         template: DebTemplate
-#         disk:
-#         - size_gb: 5
-#           type: thin
-#           autoselect_datastore: yes
-#         wait_for_ip_address: true
-#       delegate_to: localhost
-#       register: deploy
+    - name: Create a virtual machine from a template
+      community.vmware.vmware_guest:
+        validate_certs: no
+        hostname: "{{ vcenter_hostname }}"
+        username: "{{ vcenter_username }}"
+        password: "{{ vcenter_password }}"
+        datacenter: Datacenter
+        folder: /
+        name: Deb_Erwan
+        template: DebTemplate
+        disk:
+        - size_gb: 5
+          type: thin
+          autoselect_datastore: yes
+        wait_for_ip_address: true
+        state: poweredon
+      delegate_to: localhost
+      register: vm_result
 
-#     - name: ajout du tag Erwan dans la catégorie Proprio
-#       community.vmware.vmware_tag_manager:
-#         hostname: vcsa.formation.lan
-#         username: erwan
-#         password: F0rmation!
-#         tag_names:
-#           - Erwan
-#         state: add
-#         object_name: Deb_Erwan
-#         object_type: VirtualMachine
-#         validate_certs: no
-#       delegate_to: localhost
+    # - name: ajout du tag Erwan dans la catégorie Proprio
+    #   community.vmware.vmware_tag_manager:
+    #     hostname: vcsa.formation.lan
+    #     username: erwan
+    #     password: F0rmation!
+    #     tag_names:
+    #       - Erwan
+    #     state: add
+    #     object_name: Deb_Erwan
+    #     object_type: VirtualMachine
+    #     validate_certs: no
+    #   delegate_to: localhost
 
 # ### AJOUT DE LA DATE ###
 
-#     - name: Get timestamp from the system
-#       shell: "date +%d-%m-%Y%H-%M-%S"
-#       register: tstamp
+    # - name: Get timestamp from the system
+    #   shell: "date +%d-%m-%Y%H-%M-%S"
+    #   register: tstamp
     
-#     - name : set variables
-#       set_fact:
-#         cur_date: "{{tstamp.stdout[0:10]}}"
+    # - name : set variables
+    #   set_fact:
+    #     cur_date: "{{tstamp.stdout[0:10]}}"
 
-#     - name: Add virtual machine custom attributes
-#       community.vmware.vmware_guest_custom_attributes:
-#         hostname: vcsa.formation.lan
-#         username: erwan
-#         password: F0rmation!
-#         name: Deb_Erwan
-#         state: present
-#         attributes:
-#           - name: DateCreation
-#             value: "{{cur_date}}"
-#         validate_certs: no
-#       delegate_to: localhost
-#       register: attributes
+    # - name: Add virtual machine custom attributes
+    #   community.vmware.vmware_guest_custom_attributes:
+    #     hostname: vcsa.formation.lan
+    #     username: erwan
+    #     password: F0rmation!
+    #     name: Deb_Erwan
+    #     state: present
+    #     attributes:
+    #       - name: DateCreation
+    #         value: "{{cur_date}}"
+    #     validate_certs: no
+    #   delegate_to: localhost
+    #   register: attributes
+
+    # - name: upgrade vm compatibility
+    #   community.vmware.vmware_guest:
+    #     hostname: vcsa.formation.lan
+    #     username: erwan
+    #     password: F0rmation!
+    #     validate_certs: no
+    #     name: Deb_Erwan
+    #     hardware:
+    #       version: 14
+    
+    # - name: update OS
+    #   community.vmware.vmware_guest:
+    #     hostname: vcsa.formation.lan
+    #     username: erwan
+    #     password: F0rmation!
+    #     validate_certs: no
+    #     name: Deb_Erwan
+    #     guest_id: debian10_64Guest
+    #     state: present
 
 #AJOUT D'UNE INTERFACE RÉSEAU
-
-# - name: add a nic on network with vlan id 2001 for 422d000d-2000-ffff-0000-b00000000000
-#   community.vmware.vmware_guest_network:
-#     hostname: vcsa.formation.lan
-#     username: erwan
-#     password: F0rmation!
-#     datacenter: Datacenter
-#     name: Deb_Erwan
-#     vlan_id: 0100
 
     # - name: Attach Private Network Adapters for FW Deployment
     #   vmware_guest_network:
@@ -124,7 +134,7 @@
     #     password: F0rmation!
     #     datacenter: Datacenter
     #     validate_certs: 'no'
-    #     gather_network_info: false
+    #     gather_network_info: true
     #     name: Deb_Erwan
     #     networks:
     #       - name: VLAN_Erwan
@@ -134,6 +144,94 @@
     #         connected: true
     #         start_connected: true
     #     validate_certs: no
-    #   delegate_to: localhost
+
+    # - name: add vmxnet3
+    #   vmware_guest_network:
+    #     hostname: vcsa.formation.lan
+    #     username: erwan
+    #     password: F0rmation!
+    #     datacenter: Datacenter
+    #     validate_certs: no
+    #     name: Deb_Erwan
+    #     gather_network_info: true
+    #     networks:
+    #       - name: "VM Network"
+    #         state: present
+    #         device_type: vmxnet3
+    #       - name: "VLAN_Erwan"
+    #         state: present
+    #         device_type: vmxnet3
+
+    # - name: turn on the vm
+    #   community.vmware.vmware_guest:
+    #     validate_certs: no
+    #     hostname: vcsa.formation.lan
+    #     username: erwan
+    #     password: F0rmation!
+    #     name: Deb_Erwan
+    #     state: poweredon
+    #     wait_for_ip_address: True
+
+    # - debug: "{{ vm_result }}"
+
+    - name: fact creation
+      set_fact:
+        vm_ip: "{{ vm_result.instance.ipv4 }}"
+
+    - name: GET VM IP
+      set_fact:
+      debugger: on_failed
+      tags: always
+
+    - debug:
+        var: vm_ip
+
+    - debug: "{{ vm_ip }}"
+
+### SSH
+
+
+    - name: add host
+      ansible.builtin.add_host:
+        hostname: "{{ vm_ip }}"
+        ansible_inventory: /inventory
+        ansible_user: dawan
+        ansible_password: dawan
+        groups:
+          - dawan
+
+    - name: ssh key
+      shell: "ssh-keyscan {{ vm_ip }} >> ~/.ssh/known_hosts"
+
+- name: pt2
+  hosts: dawan
+
+  tasks:
+
+    - name: Set authorized key taken from file
+      ansible.posix.authorized_key:
+        user: dawan
+        key: "{{ lookup('file', '/home/erwan/dawan.pub') }}"
+        validate_certs: no
+
+    - name: install
+      apt:
+        name: ['apache2', 'mariadb-server', 'php7.3', 'php7.3-mysql', 'zip', 'unzip']
+
+    # - name: wordpress dld
+    #   shell: wget https://fr.wordpress.org/latest-fr_FR.zip
+
+    # - name: wordpress unzip
+    #   shell: unarchive latest-fr_FR.zip -d /var/www/html
+
+    # - name: Check that you can connect (GET) to a page and it returns a status 200
+    #   uri:
+    #     url: "{{ vm_ip }}"
+
+    # - name: update apt cache
+    #   apt:
+    #     update_cache: yes
+    #     cache_valid_time: 7200
+
 
 ...
