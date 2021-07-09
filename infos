@@ -1,0 +1,2 @@
+Quiesce infos : A quiesce operation ensures that a snapshot disk represents a consistent state of the guest file systems.
+https://docs.vmware.com/en/VMware-vSphere/7.0/com.vmware.vsphere.vm_admin.doc/GUID-64B866EF-7636-401C-A8FF-2B4584D9CA72.html

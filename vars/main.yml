@@ -6,8 +6,8 @@ inventory: /inventory
 
 # AUTHENTIFICATION
 vcenter_hostname:  vcsa.formation.lan
-vcenter_username: erwan
-vcenter_password: F0rmation!
+# vcenter_username: secured
+# vcenter_password: secured
 prenom: Erwan
 
 
@@ -35,6 +35,7 @@ network_connected_default: yes
 wait_for_ip_address_default: true
 guest_id: debian10_64Guest
 validate_certs: no
+vm_group: dawan
 
 # NETWORK
 vlan_id: 0100
@@ -42,13 +43,16 @@ vSwitch_name: vSwitch0
 
 
 # LISTS
-hosts: [esxi1.formation.lan, esxi2.formation.lan, esxi3.formation.lan]
+exsi_hosts: [esxi1.formation.lan, esxi2.formation.lan, esxi3.formation.lan]
 packages: ['apache2', 'mariadb-server', 'php7.3', 'php7.3-mysql', 'zip', 'unzip']
 
 # ANSIBLE VARIABLES
-ansible_username: dawan
-ansible_password: dawan
+# ansible_username: secured
+# ansible_password: secured
 ssh_public_key_path: /home/erwan/dawan.pub
+
+# SNAPSHOT VARIABLES
+snapshot_name: State before installs
 
 
 ...

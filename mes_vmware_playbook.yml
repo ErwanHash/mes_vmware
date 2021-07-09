@@ -1,17 +1,18 @@
 ---
-### VM preparation ###
+### VM PREP ###
 - name: "PT I, VCENTER"
   hosts: localhost
   gather_facts: no
   connection: local
+  become: yes
+  vars_files: 
+    - vars/main.yml
+    - vars/users.yml
   tasks:
-
-    - name: Include vars
-      include_vars: vars.yml
 
     - name: Add a portgroup
       vmware_portgroup:
-        hosts: "{{ hosts }}"
+        hosts: "{{ exsi_hosts }}"
         hostname: "{{ vcenter_hostname }}"
         username: "{{ vcenter_username }}"
         password: "{{ vcenter_password }}"
@@ -147,16 +148,16 @@
 
 # Start the VM (if set to poweredoff when created)
 
-    # - name: Turn on the vm
-    #   vmware_guest:
-    #     hostname: "{{ vcenter_hostname }}"
-    #     username: "{{ vcenter_username }}"
-    #     password: "{{ vcenter_password }}"
-    #     validate_certs: "{{ validate_certs }}"
-    #     wait_for_ip_address: true
-    #     name: "{{ vm_name }}"
-    #     state: poweredon
-    #   tags: vm
+    - name: Turn on the vm
+      vmware_guest:
+        hostname: "{{ vcenter_hostname }}"
+        username: "{{ vcenter_username }}"
+        password: "{{ vcenter_password }}"
+        validate_certs: "{{ validate_certs }}"
+        wait_for_ip_address: true
+        name: "{{ vm_name }}"
+        state: poweredon
+      tags: vm
 
 # Create a fact for the VM's ip
 
@@ -177,7 +178,7 @@
         ansible_user: "{{ ansible_username }}"
         ansible_password: "{{ ansible_password }}"
         groups:
-          - dawan
+          - "{{ vm_group }}"
       tags: ssh
 
     - name: ssh key
@@ -194,23 +195,23 @@
         validate_certs: "{{ validate_certs }}"
         datacenter: "{{ datacenter }}"
         folder: "{{ folder_name }}"
-        name: "{{vm_name }}"
+        name: "{{ vm_name }}"
         memory_dump: yes
         quiesce: yes
         state: present
-        snapshot_name: State before installs
+        snapshot_name: "{{ snapshot_name }}"
         description: Use it if anything goes wrong
       tags: vm, snapshot
 
-### Now we work on the VM ###
+### NOW WE WORK ON THE VM ###
 - name: "PT II, VM"
-  hosts: dawan
-
+  hosts: "{{ vm_group }}"
+  gather_facts: no
+  become: yes
+  vars_files: 
+    - vars/main.yml
+    - vars/users.yml
   tasks:
-
-    - name: Include vars
-      include_vars: vars.yml
-      tags: var
 
     - name: Set authorized key taken from file
       ansible.posix.authorized_key:
@@ -253,5 +254,31 @@
     #   uri:
     #     url: "{{ vm_ip }}"
 
+### BACK TO LOCAL ###
+- name: "PT III, BACK TO VCENTER"
+  hosts: localhost
+  gather_facts: no
+  connection: local
+  become: yes
+  vars_files: 
+    - vars/main.yml
+    - vars/users.yml
+  tasks:
 
+# Remove the previously created snapshot
+
+    - name: Remove our snapshot
+      vmware_guest_snapshot:
+        hostname: "{{ vcenter_hostname }}"
+        username: "{{ vcenter_username }}"
+        password: "{{ vcenter_password }}"
+        validate_certs: "{{ validate_certs }}"
+        datacenter: "{{ datacenter }}"
+        folder: "{{ folder_name }}"
+        name: "{{ vm_name }}"
+        memory_dump: yes
+        quiesce: yes
+        state: absent
+        snapshot_name: "{{ snapshot_name }}"
+      tags: vm, snapshot
 ...
