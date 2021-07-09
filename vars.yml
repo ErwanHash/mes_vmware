@@ -1,0 +1,54 @@
+---
+# DEFAULT
+delegate_to_default: localhost
+inventory: /inventory
+
+
+# AUTHENTIFICATION
+vcenter_hostname:  vcsa.formation.lan
+vcenter_username: erwan
+vcenter_password: F0rmation!
+prenom: Erwan
+
+
+# TAG
+tag_category_name: Proprio
+tag_category_id: "urn:vmomi:InventoryServiceCategory:ae1957ef-839b-468c-ac6a-df722535aeb1:GLOBAL"
+tag_name: Erwan
+tag_description: One of the best tag so far
+
+
+# VSPHERE INFOS
+cluster_name: Cluster
+datacenter: Datacenter
+folder_name: /
+template_name: DebTemplate
+datastore_cluster_name: DatastoreCluster/LUN1
+
+# VM
+vlan_name: "VLAN_{{prenom}}"
+vm_name: "Deb-{{vcenter_username}}"
+disk_size: 5
+disk_type_default: thin
+autoselect_datastore_default: yes
+network_connected_default: yes
+wait_for_ip_address_default: true
+guest_id: debian10_64Guest
+validate_certs: no
+
+# NETWORK
+vlan_id: 0100
+vSwitch_name: vSwitch0
+
+
+# LISTS
+hosts: [esxi1.formation.lan, esxi2.formation.lan, esxi3.formation.lan]
+packages: ['apache2', 'mariadb-server', 'php7.3', 'php7.3-mysql', 'zip', 'unzip']
+
+# ANSIBLE VARIABLES
+ansible_username: dawan
+ansible_password: dawan
+ssh_public_key_path: /home/erwan/dawan.pub
+
+
+...

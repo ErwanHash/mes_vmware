@@ -23,25 +23,7 @@
       debug:
         msg: "{{cur_date}}"
 
-    # - name: add vmxnet3
-    #   vmware_guest_network:
-    #     hostname: vcsa.formation.lan
-    #     username: erwan
-    #     password: F0rmation!
-    #     datacenter: Datacenter
-    #     validate_certs: no
-    #     name: Deb_Erwan
-    #     gather_network_info: true
-    #     networks:
-    #       - name: "VM Network"
-    #         state: present
-    #         device-type: vmxnet3
-    #       - name: "VLAN-Erwan"
-    #         state: new
-    #         device-type: vmxnet3
-    #         label: "Network adapter 2"
-    #         connected: true
-    #         start_connected: true
+
 
     
 # - name: add a nic on network with vlan id 2001 for 422d000d-2000-ffff-0000-b00000000000
@@ -130,6 +112,24 @@
     #     vm_ip: "{{vm_info.virtual_machines.guest_name==}}"
     #   tags: Erwan
 
-    # - debug: var=hostvars[inventory_hostname]['ansible_default_ipv4']['address']
+    # - name: Attach Private Network Adapters for FW Deployment
+    #   vmware_guest_network:
+    #     hostname: vcsa.formation.lan
+    #     username: erwan
+    #     password: F0rmation!
+    #     datacenter: Datacenter
+    #     validate_certs: 'no'
+    #     gather_network_info: true
+    #     name: Deb_Erwan
+    #     networks:
+    #       - name: VLAN_Erwan
+    #         device_type: vmxnet3
+    #         state: new
+    #         label: "Network adapter 2"
+    #         connected: true
+    #         start_connected: true
+    #     validate_certs: no
+    #     tags: vm, network
+
     
-    # - debug: "{{vm_result.instance.ipv4}}"
+    
